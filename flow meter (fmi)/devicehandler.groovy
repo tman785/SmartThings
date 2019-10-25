@@ -41,62 +41,12 @@ metadata {
 	}
     
     preferences {
-        input ("version", "text", title: "Plugin Version 1.5", description:"", required: false, displayDuringSetup: true)
        input "gallonThreshhold", "decimal", title: "High Flow Rate Threshhold", description: "Flow rate (in gpm) that will trigger a notification.", defaultValue: 5, required: false, displayDuringSetup: true
-       input("registerEmail", type: "email", required: false, title: "Email Address", description: "Register your device with FortrezZ", displayDuringSetup: true)
+       input ("version", "text", title: "Plugin Version 1.5", description:"", required: false, displayDuringSetup: true)
+		//input("registerEmail", type: "email", required: false, title: "Email Address", description: "Register your device with FortrezZ", displayDuringSetup: true)
     }
 
-	tiles(scale: 2) {
-    	carouselTile("flowHistory", "device.image", width: 6, height: 3) { }
-		valueTile("battery", "device.battery", inactiveLabel: false, width: 2, height: 2) {
-			state "battery", label:'${currentValue}%\nBattery', unit:""
-		}
-		valueTile("temperature", "device.temperature", width: 2, height: 2) {
-            state("temperature", label:'${currentValue}°',
-                backgroundColors:[
-                    [value: 31, color: "#153591"],
-                    [value: 44, color: "#1e9cbb"],
-                    [value: 59, color: "#90d2a7"],
-                    [value: 74, color: "#44b621"],
-                    [value: 84, color: "#f1d801"],
-                    [value: 95, color: "#d04e00"],
-                    [value: 96, color: "#bc2323"]
-                ]
-            )
-        }
-        valueTile("gpm", "device.gpm", inactiveLabel: false, width: 2, height: 2) {
-			state "gpm", label:'${currentValue}gpm', unit:""
-		}
-		standardTile("powerState", "device.powerState", width: 2, height: 2) { 
-			state "reconnected", icon:"http://swiftlet.technology/wp-content/uploads/2016/02/Connected-64.png", backgroundColor:"#cccccc"
-			state "disconnected", icon:"http://swiftlet.technology/wp-content/uploads/2016/02/Disconnected-64.png", backgroundColor:"#cc0000"
-			state "batteryReplaced", icon:"http://swiftlet.technology/wp-content/uploads/2016/04/Full-Battery-96.png", backgroundColor:"#cccccc"
-			state "noBattery", icon:"http://swiftlet.technology/wp-content/uploads/2016/04/No-Battery-96.png", backgroundColor:"#cc0000"
-		}
-		standardTile("waterState", "device.waterState", width: 2, height: 2, canChangeIcon: true) {
-			state "none", icon:"http://cdn.device-icons.smartthings.com/Weather/weather12-icn@2x.png", backgroundColor:"#cccccc", label: "No Flow"
-			state "flow", icon:"http://cdn.device-icons.smartthings.com/Weather/weather12-icn@2x.png", backgroundColor:"#53a7c0", label: "Flow"
-			state "overflow", icon:"http://cdn.device-icons.smartthings.com/Weather/weather12-icn@2x.png", backgroundColor:"#cc0000", label: "High Flow"
-		}
-		standardTile("heatState", "device.heatState", width: 2, height: 2) {
-			state "normal", label:'Normal', icon:"st.alarm.temperature.normal", backgroundColor:"#ffffff"
-			state "freezing", label:'Freezing', icon:"st.alarm.temperature.freeze", backgroundColor:"#2eb82e"
-			state "overheated", label:'Overheated', icon:"st.alarm.temperature.overheat", backgroundColor:"#F80000"
-		}
-        standardTile("take1", "device.image", width: 2, height: 2, canChangeIcon: false, inactiveLabel: true, canChangeBackground: false, decoration: "flat") {
-            state "take", label: "", action: "Image Capture.take", nextState:"taking", icon: "st.secondary.refresh"
-        }
-		standardTile("chartMode", "device.chartMode", width: 2, height: 2, canChangeIcon: false, canChangeBackground: false, decoration: "flat") {
-			state "day", label:'24 Hours\n(press to change)', nextState: "week", action: 'chartMode'
-			state "week", label:'7 Days\n(press to change)', nextState: "month", action: 'chartMode'
-			state "month", label:'4 Weeks\n(press to change)', nextState: "day", action: 'chartMode'
-		}
-		valueTile("zeroTile", "device.zero", width: 2, height: 2, canChangeIcon: false, canChangeBackground: false, decoration: "flat") {
-			state "zero", label:'Zero', action: 'zero'
-		}
-		main (["waterState"])
-		details(["flowHistory", "chartMode", "take1", "temperature", "gpm", "waterState", "battery"])
-	}
+
     
 }
 
@@ -217,7 +167,7 @@ def zero()
     ], 100)
 }
 
-def zwaveEvent(physicalgraph.zwave.commands.sensormultilevelv5.SensorMultilevelReport cmd)
+def zwaveEvent(hubitat.zwave.commands.sensormultilevelv5.SensorMultilevelReport cmd)
 {
 	log.debug cmd
 	def map = [:]
@@ -246,7 +196,7 @@ def zwaveEvent(physicalgraph.zwave.commands.sensormultilevelv5.SensorMultilevelR
 	return map
 }
 
-def zwaveEvent(physicalgraph.zwave.commands.meterv3.MeterReport cmd)
+def zwaveEvent(hubitat.zwave.commands.meterv3.MeterReport cmd)
 {
 	def map = [:]
     map.name = "gpm"
@@ -263,7 +213,7 @@ def zwaveEvent(physicalgraph.zwave.commands.meterv3.MeterReport cmd)
 	return map
 }
 
-def zwaveEvent(physicalgraph.zwave.commands.alarmv2.AlarmReport cmd)
+def zwaveEvent(hubitat.zwave.commands.alarmv2.AlarmReport cmd)
 {
 	def map = [:]
     if (cmd.zwaveAlarmType == 8) // Power Alarm
@@ -336,7 +286,7 @@ def zwaveEvent(physicalgraph.zwave.commands.alarmv2.AlarmReport cmd)
 	return map
 }
 
-def zwaveEvent(physicalgraph.zwave.commands.batteryv1.BatteryReport cmd) {
+def zwaveEvent(hubitat.zwave.commands.batteryv1.BatteryReport cmd) {
 	def map = [:]
 	if(cmd.batteryLevel == 0xFF) {
 		map.name = "battery"
@@ -352,7 +302,7 @@ def zwaveEvent(physicalgraph.zwave.commands.batteryv1.BatteryReport cmd) {
 	return map
 }
 
-def zwaveEvent(physicalgraph.zwave.Command cmd)
+def zwaveEvent(hubitat.zwave.Command cmd)
 {
 	log.debug "COMMAND CLASS: $cmd"
 }
